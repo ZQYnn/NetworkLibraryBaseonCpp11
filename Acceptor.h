@@ -21,7 +21,6 @@ public:
     void listen();
     
 private :
-    // 重点内容
     void handleRead();
     EventLoop *loop_;
     Socket acceptSocket_;
