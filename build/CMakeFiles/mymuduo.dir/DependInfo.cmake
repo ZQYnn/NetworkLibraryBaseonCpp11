@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/zqy/muduo/mymuduo/Acceptor.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Acceptor.o"
+  "/home/zqy/muduo/mymuduo/Buffer.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Buffer.o"
   "/home/zqy/muduo/mymuduo/Channel.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Channel.o"
   "/home/zqy/muduo/mymuduo/CurrentThread.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/CurrentThread.o"
   "/home/zqy/muduo/mymuduo/DefaultPoller.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/DefaultPoller.o"
@@ -16,6 +17,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/zqy/muduo/mymuduo/Logger.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Logger.o"
   "/home/zqy/muduo/mymuduo/Poller.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Poller.o"
   "/home/zqy/muduo/mymuduo/Socket.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Socket.o"
+  "/home/zqy/muduo/mymuduo/TcpConnection.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/TcpConnection.o"
   "/home/zqy/muduo/mymuduo/TcpServer.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/TcpServer.o"
   "/home/zqy/muduo/mymuduo/Thread.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Thread.o"
   "/home/zqy/muduo/mymuduo/Timestamp.cc" "/home/zqy/muduo/mymuduo/build/CMakeFiles/mymuduo.dir/Timestamp.o"

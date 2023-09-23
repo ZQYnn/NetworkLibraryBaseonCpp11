@@ -11,7 +11,6 @@ public:
 
     using NewConnectionCallback = std::function<void(int sockfd, const InetAddress&)>;
     Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reuseport);
-    
     ~Acceptor();
     void setNewConncetionCallback(const NewConnectionCallback &cb)
     {
@@ -27,4 +26,5 @@ private :
     Channel acceptChannel_;
     NewConnectionCallback newConnectionCallback_;
     bool listenning_;
+    int nextConnId_;
 }; 
