@@ -82,9 +82,21 @@ CMakeFiles/mymuduo.dir/Socket.o
  /home/zqy/muduo/mymuduo/Socket.h
  /home/zqy/muduo/mymuduo/noncopyable.h
 CMakeFiles/mymuduo.dir/TcpConnection.o
+ /home/zqy/muduo/mymuduo/Buffer.h
+ /home/zqy/muduo/mymuduo/Callbacks.h
+ /home/zqy/muduo/mymuduo/Channel.h
+ /home/zqy/muduo/mymuduo/CurrentThread.h
+ /home/zqy/muduo/mymuduo/EventLoop.h
+ /home/zqy/muduo/mymuduo/InetAddress.h
+ /home/zqy/muduo/mymuduo/Logger.h
+ /home/zqy/muduo/mymuduo/Socket.h
  /home/zqy/muduo/mymuduo/TcpConnection.cc
+ /home/zqy/muduo/mymuduo/TcpConnection.h
+ /home/zqy/muduo/mymuduo/Timestamp.h
+ /home/zqy/muduo/mymuduo/noncopyable.h
 CMakeFiles/mymuduo.dir/TcpServer.o
  /home/zqy/muduo/mymuduo/Acceptor.h
+ /home/zqy/muduo/mymuduo/Buffer.h
  /home/zqy/muduo/mymuduo/Callbacks.h
  /home/zqy/muduo/mymuduo/Channel.h
  /home/zqy/muduo/mymuduo/CurrentThread.h
@@ -93,6 +105,7 @@ CMakeFiles/mymuduo.dir/TcpServer.o
  /home/zqy/muduo/mymuduo/InetAddress.h
  /home/zqy/muduo/mymuduo/Logger.h
  /home/zqy/muduo/mymuduo/Socket.h
+ /home/zqy/muduo/mymuduo/TcpConnection.h
  /home/zqy/muduo/mymuduo/TcpServer.cc
  /home/zqy/muduo/mymuduo/TcpServer.h
  /home/zqy/muduo/mymuduo/Timestamp.h

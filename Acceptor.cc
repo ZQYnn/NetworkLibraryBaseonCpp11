@@ -38,7 +38,7 @@ Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reusepor
 
 Acceptor::~Acceptor()
 {
-    acceptChannel_.disalbeAll();
+    acceptChannel_.disableAll();
     // 将channel 从channel 中删除
     acceptChannel_.remove();
     
