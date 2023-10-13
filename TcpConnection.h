@@ -106,7 +106,6 @@ private:
     // 读写buffer
     Buffer inputBuffer_;
     Buffer outputBuffer_;
-    
 
-    
+    // 读写 buffer  
 };

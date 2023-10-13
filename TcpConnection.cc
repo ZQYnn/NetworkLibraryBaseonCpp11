@@ -301,6 +301,5 @@ void TcpConnection::shutdownInLoop()
     if (!channel_->isWriting()) // 说明当前outputbuffer 中的数据已经穿发送完成
     {
         socket_->shutdownWrite();
-    }
-    
+    } 
 }

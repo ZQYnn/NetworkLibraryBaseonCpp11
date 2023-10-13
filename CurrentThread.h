@@ -1,26 +1,20 @@
-// 获取线程
-
 #pragma once
 
 #include <unistd.h>
-#include <sys/syscall.h> 
-
+#include <sys/syscall.h>
 
 namespace CurrentThread
 {
-    extern __thread int  t_cacahedTid;
-    
+    extern __thread int t_cachedTid;
+
     void cacheTid();
 
     inline int tid()
     {
-        if (__builtin_expect(t_cacahedTid == 0, 0))
+        if (__builtin_expect(t_cachedTid == 0, 0))
         {
             cacheTid();
         }
-        return t_cacahedTid;
-        
+        return t_cachedTid;
     }
-    
-} // namespace CurrentThread
-
+}

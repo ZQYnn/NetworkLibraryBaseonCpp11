@@ -79,7 +79,7 @@ private:
     EventLoop *loop_; 
     const int fd_;  // fd, Poller 监听的对象 
     int events_;    // 需要监听的的事件
-    int revents_;   // poller 返回的已经发生的事件
+    int revents_;   // poller 返回的已经发生的事件 根据对应的事件执行对应的回调函数
     int index_;     
     
     
