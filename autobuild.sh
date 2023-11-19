@@ -23,10 +23,12 @@ if [ ! -d /usr/include/mymuduo ]; then
     mkdir /usr/include/mymuduo
 fi
 
+cd src
 for header in `ls *.h`
 do
     cp $header /usr/include/mymuduo
 done
+cd ..
 
 cp `pwd`/lib/libmymuduo.so /usr/lib
 
