@@ -42,7 +42,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                 , highWaterMark_(64 * 1024 * 1024)
                 
 {
-    // 设置Channel的回调函数
+    // 设置Channel的回调函数 poller 给channel 通知对应事件发生， channel执行相应的回调
     channel_->setReadCallback(
         std::bind(&TcpConnection::handleRead, this, std::placeholders::_1)
     );
@@ -64,6 +64,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                     
 }
 
+
 TcpConnection::~TcpConnection()
 {
     LOG_INFO("TcpConnection::dtor[%s] at fd = %d state = %d\n",
@@ -80,7 +81,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
     if (n > 0)
     {
         // 建立连接的用户有可读事件发生了  调用用户传入的回调操作onmessage
-        // shared_from_this 当前对象的指针指针的使用的方式
+        // shared_from_this 当前对象的指针指针
         messageCallback_(shared_from_this(), &inputBuffer_, receiveTime); 
     }
     else  if (n == 0)
@@ -109,7 +110,7 @@ void TcpConnection::handleWrite()
                 channel_->disableWriting();
                 if (writeCompleteCallback_)
                 {
-                    // 唤醒loop 对应的thread线程， 执行回调函数
+                    // 唤醒loop 对应的thread线程，执行回调函数
                     loop_->queueInLoop(
                         std::bind(writeCompleteCallback_, shared_from_this())
                     );
@@ -127,7 +128,6 @@ void TcpConnection::handleWrite()
     }else
     {
         LOG_ERROR("TcpConnection fd = %d is down , no more writing\n", channel_->fd());
-        
     }
 }
 // poller ->  channel::closeCallback() => tcpConnection::handleClose
@@ -141,10 +141,8 @@ void TcpConnection::handleClose()
     TcpConnectionPtr  connptr(shared_from_this());
     connectionCallback_(connptr); // 执行关闭连接的回调的
     closeCallback_(connptr);      // 关闭连接的回调函数 执行的是TcpServer::removeConnection回调方法
-     
+    
 }
-
-//  tcpConnection的理解的问题 
 
 void TcpConnection::handleError()
 {
@@ -164,7 +162,7 @@ void TcpConnection::handleError()
 
 
 // send 绑定sendInLoop函数处理方法 send 方法重点理解
-void TcpConnection::send(const std::string &buf)
+void TcpConnection:: send(const std::string &buf)
 {
     if (state_ == kConnected)
     {
@@ -261,17 +259,15 @@ void TcpConnection::sendInLoop(const void* data, size_t len)
 void TcpConnection::connectEstablished()
 {
     setState(kConnected);
-    // 这里使用tie的原因是什么？TcpConnection 4， 03mins
+    // 强智能指针保证TcpConnection不被释放,
     channel_->tie(shared_from_this()); 
     // 向poller注册channel的epollin事件 也就是读事件
     channel_->enableReading();
 
     // 新连接建立 执行回调函数
     connectionCallback_(shared_from_this());
-    
-     
 }
-// 连接销毁 关闭
+// 连接销毁 关闭 
 void TcpConnection::connectDestoryed()
 {
     if(state_ == kConnected)
@@ -280,9 +276,11 @@ void TcpConnection::connectDestoryed()
         // 取消监听所有的事件 从poller 中删除
         channel_->disableAll();
     }
+    
     // 把channel从poller 中删除掉
     channel_->remove();
 }
+
 void TcpConnection::shutdown()
 {
     if (state_ == kDisconnected)
@@ -294,10 +292,8 @@ void TcpConnection::shutdown()
     }
 }
 
-// tcpConnection 还是没有完全理解
 void TcpConnection::shutdownInLoop()
 {
-    
     if (!channel_->isWriting()) // 说明当前outputbuffer 中的数据已经穿发送完成
     {
         socket_->shutdownWrite();

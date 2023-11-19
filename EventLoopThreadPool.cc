@@ -36,12 +36,14 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb)
         // 底层创建线程 绑定一个新的EventLoop 返回Loop的地址 
         loops_.push_back(t->startLoop());
     }
+
     // numThreads == 0 说明整个服务端只有一个线程， 运行着baseLoop
     if (numThreads_ == 0 && cb)
     {
         cb(baseLoop_);
     }
 }
+
 
 EventLoop* EventLoopThreadPool::getNextLoop()
 {
@@ -70,3 +72,4 @@ std::vector<EventLoop*> EventLoopThreadPool:: getAllLoops()
         return loops_;
     }
 }
+

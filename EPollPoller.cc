@@ -8,7 +8,6 @@
 #include <strings.h>
 
 
-
 // 未添加到poller 中
 const int kNew = -1; // channel 中的index 初始化 也是 -1
 
@@ -18,7 +17,6 @@ const int kAdded = 1;
 // channel从 poller 中删除
 const int kDeleted = 2;
 
-// 
 
 EPollPoller::EPollPoller(EventLoop *loop)
     : Poller(loop)
@@ -30,7 +28,6 @@ EPollPoller::EPollPoller(EventLoop *loop)
     {
         LOG_FATAL("epoll create error %d \n", errno);
     }
-    
 }
 
 // 析构函数
@@ -40,7 +37,7 @@ EPollPoller::~EPollPoller()
 }
 
 /*
-EventLoop -> poller-> EPollPoller - > poll  
+EventLoop -> poller-> EPollPoller - > poll   通过返回给EevntLoop中 ChannelList中
 */
 Timestamp EPollPoller::poll (int timeoutMs, ChannelList *activeChannels)
 { 
@@ -60,7 +57,9 @@ Timestamp EPollPoller::poll (int timeoutMs, ChannelList *activeChannels)
     if (numsEvents > 0)
     {
         LOG_INFO("%d events happened \n",numsEvents);
+        
         fillActiveChannels(numsEvents, activeChannels);
+        
         if (numsEvents == events_.size())
         {
             // vector  扩容的
@@ -81,12 +80,21 @@ Timestamp EPollPoller::poll (int timeoutMs, ChannelList *activeChannels)
     }
     return now;
 }
+//
+void EPollPoller::fillActiveChannels(int numEvents, ChannelList *activeChannel) const
+{
+    for (int i = 0; i < numEvents; i ++)
+    {
+        Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
+        channel->set_revents(events_[i].events);
+        // EventLoop 获取poller 返回获取的Channel列表
+        activeChannel->push_back(channel);
+    }
+}
 
 /*
 channel  中的update方法 最终通过EventLoop调用了 EPollPoller 中的updateChanel方法 
-
-
- channel update ——》 EventLoop  updateChannel -》 poller -》 epollpoller
+ channel.update ——》 EventLoop  updateChannel -》 poller -》 epollpoller
 */
 
 /*
@@ -128,10 +136,9 @@ void EPollPoller::updateChannel(Channel *channel )
             update(EPOLL_CTL_MOD, channel);
         }
     }
-    
-    
-    
 }
+
+
 // remove方法 同理 update
 // 从chanel 中删除， 如果已经添加到epoll监听中， 需要从poller 中删除
 void EPollPoller::removeChannel(Channel *channel)
@@ -150,17 +157,7 @@ void EPollPoller::removeChannel(Channel *channel)
     channel->set_index(kNew);
 }
 
-//
-void EPollPoller::fillActiveChannels(int numEvents, ChannelList *activeChannel) const
-{
-    for (int i = 0; i < numEvents; i ++)
-    {
-        Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
-        channel->set_revents(events_[i].events);
-        // EventLoop 获取poller 返回获取的Channel列表
-        activeChannel->push_back(channel);
-    }
-}
+
 
 /// @brief   
 /// @param operation 

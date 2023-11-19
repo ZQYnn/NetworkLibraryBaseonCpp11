@@ -35,7 +35,9 @@ private:
     bool started_; 
     int numThreads_;
     int next_;
-    // 所有事件的线程
+
+    
+    // 所有事件的线程 
     std::vector<std::unique_ptr<EventLoopThread>> threads_;
     // 所有事件线程的eventLoop指针
     std::vector<EventLoop*> loops_;

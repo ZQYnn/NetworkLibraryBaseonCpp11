@@ -38,26 +38,21 @@ public:
     const InetAddress& localAddress() const { return localAddr_; }
     const InetAddress& peerAddress() const { return peerAddr_; }
 
-
     bool connected() const {return state_ == kConnected; }
     
     void send(const std::string &buf);
     void shutdown();
 
-    void setConnectionCallback(const ConnectionCallback& cb)
-    { connectionCallback_ = cb; }
-
-    void setMessageCallback(const MessageCallback& cb)
-    { messageCallback_ = cb; }
-
-    void setWriteCompleteCallback(const WriteCompleteCallback& cb)
-    { writeCompleteCallback_ = cb; }
+    void setConnectionCallback(const ConnectionCallback& cb) { connectionCallback_ = cb; }
+    void setMessageCallback(const MessageCallback& cb) { messageCallback_ = cb; }
+    void setWriteCompleteCallback(const WriteCompleteCallback& cb) { writeCompleteCallback_ = cb; }
+    void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; }
 
     void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark)
-    { highWaterMarkCallback_ = cb; highWaterMark_ = highWaterMark; }
-
-    void setCloseCallback(const CloseCallback& cb)
-    { closeCallback_ = cb; }
+    { 
+        highWaterMarkCallback_ = cb; highWaterMark_ = highWaterMark;
+    }
+   
     
     // 建立连接
     void connectEstablished(); 
@@ -82,13 +77,13 @@ private:
     const std::string name_;
     std::atomic_int state_;
     bool reading_;
-
+    
     // 这里和acceptor类似 Acceptor -》 mainLoop 主要监听新用户的连接
     // TcpConnection => subLoop 监听已连接用户的读写事件
     std::unique_ptr<Socket> socket_;
     std::unique_ptr<Channel> channel_;
     
-    // 当前
+    
     const InetAddress localAddr_;
     const InetAddress peerAddr_;
 
@@ -105,7 +100,5 @@ private:
     
     // 读写buffer
     Buffer inputBuffer_;
-    Buffer outputBuffer_;
-
-    // 读写 buffer  
+    Buffer outputBuffer_; 
 };

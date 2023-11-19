@@ -19,7 +19,7 @@ cc
 class Buffer
 {
 public:
-    static const size_t kCheapPrepend = 0;
+    static const size_t kCheapPrepend = 8;
     static const size_t kInitialSize = 1024;
     
     explicit Buffer(size_t initialSize = kInitialSize)
@@ -116,6 +116,7 @@ public:
 private:
     char* begin()
     { 
+        // it.operator*();
         // * 是对buffer.begin() iterator的解引用 获取首元素的值
         // 之后 &的操作是 获取首元素的地址
         return &*buffer_.begin();

@@ -30,15 +30,18 @@ public:
             Option option = kNoReusePort);
     ~TcpServer();
     
+    
     void setThreadInitcallback(const ThreadInitCallback &cb) { threadInitCallback_ = cb; }
     void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
-    void setConnectionCallback(const ConnectionCallback &cb) {connectionCallback_ = cb; }
+    void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
     void setWriteCompleteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb;}
-    
     void setThreadNum(int numThreads);
     
     void start(); 
 private:
+
+    // 这个 就是经过accept 之后 建立连接之后 connfd 打包channel 之后 建立连接
+    // 非常重要的 回调函数
     void newConncetion(int sockfd, const InetAddress &peerAddr);
     void removeConnection(const TcpConnectionPtr &conn);
     void removeConnectionInLoop(const TcpConnectionPtr &conn);

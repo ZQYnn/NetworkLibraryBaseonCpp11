@@ -6,6 +6,7 @@
 #include <netinet/tcp.h>
 #include <strings.h>
 
+//  listenfd 是从哪里获取的呢 ？
 Socket::~Socket()
 {
     close(sockfd_);

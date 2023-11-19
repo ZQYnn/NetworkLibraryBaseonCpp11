@@ -15,6 +15,7 @@ EventLoop* CheckLoopNotNull(EventLoop *loop)
     return loop; 
 }
 
+
 TcpServer::TcpServer(EventLoop *loop,
                     const InetAddress &listenAddr,
                     const std::string &nameArg,
@@ -29,19 +30,19 @@ TcpServer::TcpServer(EventLoop *loop,
                     , nextConnId_(1)
                     , started_(0)
 {
-    
     acceptor_->setNewConncetionCallback(std::bind(&TcpServer::newConncetion, 
     this, std::placeholders::_1,  std::placeholders::_2));
 }
+
 TcpServer::~TcpServer()
 {
-    // 这里使用智能指针的操作还是没有理解
+    
     for (auto& item : conncetions_)
     {
-        //局部的
-        TcpConnectionPtr conn(item.second); 
+        // 局部强智能智能出作用域 可以自动释放TcpConnectionPtr 资源
+        TcpConnectionPtr conn(item.second);
         item.second.reset();
-    
+        // 销毁连接
         conn->getLoop()->runInLoop(
             std::bind(&TcpConnection::connectDestoryed, conn)
         );   
@@ -77,7 +78,7 @@ void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
     LOG_INFO("TcpServer::newConnection [%s] - new conncetion [%s] from %s \n",
             name_.c_str(), connName.c_str(), peerAddr.toIpPort().c_str());
     
-    // 通过sockfd 获取其绑定的本机的ip地址和端口号
+    // 通过sockfd 获取其绑定的本机的ip地址和端口号 
     sockaddr_in local;
     ::bzero(&local, sizeof local);
     socklen_t addrlen = sizeof local;
@@ -85,9 +86,8 @@ void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
     {
         LOG_ERROR("sockets::getLocalAddr");
     }
-    
-    
     InetAddress localAddr(local);
+    
     
     // 根据连接成功的sockfd 创建TcpConnection连接对象
     TcpConnectionPtr conn(new TcpConnection(ioLoop, connName, sockfd, localAddr, peerAddr));
@@ -95,21 +95,21 @@ void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
     conncetions_[connName] = conn;
      
     // 下面的回调函数都是 用户设置给Tcpserver -> tcpConnection -> Channel -> poller ->  channel 进行回调
+    //  用户自己设置的回调函数
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);
     
+
     // 设置如何关闭回调  用户调用shutdown
-    // conn(tcpConnection) -> shutdown ->shutdownInLoop -> shutWrite -> 
+    // conn(tcpConnection) -> shutdown ->shutdownInLoop -> sockct::shutWrite -> 
     conn->setCloseCallback(
         std::bind(&TcpServer::removeConnection, this, std::placeholders::_1)
     );
     
-    // 直接调用TcpConnection::connectEstablish
+    // 直接调用TcpConnection::connectEstablished -> onConnection(用户设置的)
     ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
-        
 }
-
 
 void TcpServer::removeConnection(const TcpConnectionPtr &conn)
 {
@@ -118,7 +118,6 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn)
     );
 }
 
-
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn)
 {
     LOG_INFO("TcpServer::removeConnectionInLoop[%s] - connection %s\n",
@@ -126,10 +125,10 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn)
             
     conncetions_.erase(conn->name());
     
+    //获取当前loop 
     EventLoop *ioLoop = conn->getLoop();
     // 这里再次绕到了tcpConnection::connectDestoryed 方法 中执行channel -》remove
     ioLoop->queueInLoop(
         std::bind(&TcpConnection::connectDestoryed, conn)
     );
-      
 }

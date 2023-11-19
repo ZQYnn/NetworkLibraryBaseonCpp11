@@ -7,8 +7,6 @@ const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
-// constructor
-// EventLoop中包含了 ChannelList 以及 poller 包含了这两种
 Channel::Channel(EventLoop *loop, int fd)
     : loop_(loop)
     , fd_(fd)
@@ -18,16 +16,13 @@ Channel::Channel(EventLoop *loop, int fd)
     , tied_(false)
     {
         
-        
     }
 
 Channel::~Channel()
-{
+{   
 
-    
 }
 
-// 智能指针的使用
 void Channel::tie(const std::shared_ptr<void> &obj)
 {
     tie_ = obj;
@@ -49,16 +44,15 @@ void Channel::remove()
     loop_->removeChannel(this);   
 }
 
+
+//  执行函数回调函数处理
 void Channel::handleEvent(Timestamp receiveTime)
 {
     if (tied_)
     {
-        // 弱智能指针-> 强智能指针
-        // 智能指针的
         std::shared_ptr<void> guard = tie_.lock();
         if (guard)
         {
-            //
             handleEventWithGuard(receiveTime);
         }
     }
@@ -99,16 +93,11 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
         }
     }
     
-
-
-
-    
     if (revents_ & EPOLLOUT)
     {
         if (writeCallback_)
         {
-            writeCallback_();
-            
+            writeCallback_();            
         }
     }
     

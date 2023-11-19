@@ -12,10 +12,8 @@ class Timestamp;
 class Channel : noncopyable{
 public:
     // 使用c++ 11的方式设置回调函数 
-    
     using EventCallback  = std::function<void()>;
     using ReadEventCallback = std::function<void(Timestamp)>;
-    
     /* 
     c 的方式进行 设置回调函数
     typedef std::function<void()> EventCallback; 
@@ -36,9 +34,6 @@ public:
     void setCloseCallback(EventCallback cb ) { closeCallback_ = std::move(cb); }
     void setErrorCallback(EventCallback cb)  { errorCallback_ = std::move(cb); } 
 
-
-
-    // 8 mins 智能指针的问题  这里为什么使用 智能指针
     void tie(const std::shared_ptr<void> &);
     int fd() const {return fd_; }
     int events() const {return events_; }
@@ -54,7 +49,6 @@ public:
     void disableAll() { events_ = kNoneEvent; update();}
     
     
-    
     bool isNoneEvent() const {return events_ == kNoneEvent; }
     bool isWriting() const {return events_ & kWriteEvent; }
     bool isReading()  const {return events_ & kReadEvent; }
@@ -63,7 +57,7 @@ public:
     int index() {return index_;}
     void set_index(int idx ) {index_ = idx;}
 
-    // one loop per thread 
+    // one loop per thread  当前的channel 属于那个EventLoop
     EventLoop* ownerLoop() {return loop_;}
     void remove();
 
@@ -71,7 +65,7 @@ private:
     void update();
     void handleEventWithGuard(Timestamp receiveTime);
     
-    static const int kNoneEvent;
+    static const int kNoneEvent; // 状态信息标识
     static const int kReadEvent;
     static const int kWriteEvent;
     
@@ -80,11 +74,12 @@ private:
     const int fd_;  // fd, Poller 监听的对象 
     int events_;    // 需要监听的的事件
     int revents_;   // poller 返回的已经发生的事件 根据对应的事件执行对应的回调函数
-    int index_;     
+    int index_;     //为什么存在
     
     
     /*
         智能指针的问题， 使用weak—ptr  监听资源的状态， 弱指针 -> 强指针 
+        
     */ 
 
     std::weak_ptr<void> tie_; // 使用weak_ptr 的原因 防止调用remove:channel
@@ -96,5 +91,7 @@ private:
     EventCallback closeCallback_;
     EventCallback errorCallback_;
 };
+ 
+
 
  

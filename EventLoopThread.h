@@ -17,9 +17,8 @@ public:
     using ThreadInitCallback = std::function<void(EventLoop *)>;
     EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
         const std::string &name = std::string());
-    
+     
     ~EventLoopThread();
-    // 开启循环
     EventLoop* startLoop();
      
 private:
@@ -30,7 +29,4 @@ private:
     std::mutex mutex_;  // 互斥锁
     std::condition_variable cond_; // 条件变量
     ThreadInitCallback callback_;
-    
-    
-    
 };

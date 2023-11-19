@@ -3,6 +3,8 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+
+// 从fd上读数据 buffer 缓冲区大小是通过readfd返回的值 确定的
 ssize_t Buffer::readFd(int fd, int* saveErrno)
 {
     // 栈上的内存空间
@@ -14,10 +16,10 @@ ssize_t Buffer::readFd(int fd, int* saveErrno)
     const size_t writable = writableBytes();
     vec[0].iov_base = begin() + writerIndex_;
     vec[0].iov_len = writable;
+    
 
     vec[1].iov_base = extrabuf;
     vec[1].iov_len = sizeof extrabuf;
-
     const int iovcnt = (writable < sizeof extrabuf) ?  2 : 1;
     const ssize_t n = ::readv(fd, vec, iovcnt);
     
@@ -33,9 +35,10 @@ ssize_t Buffer::readFd(int fd, int* saveErrno)
     {
         writerIndex_ = buffer_.size();
         // 这里是从writerIndex开始写数据的
+        // n - writable 大小
         append(extrabuf, n - writable);
     }
-    // 
+    // 读取字节数量
     return n;
 }
 

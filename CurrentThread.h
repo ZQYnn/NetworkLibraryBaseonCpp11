@@ -5,6 +5,7 @@
 
 namespace CurrentThread
 {
+    //  每个 线程都有自己的tid 
     extern __thread int t_cachedTid;
 
     void cacheTid();
