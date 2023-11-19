@@ -99,10 +99,11 @@ cd ./example
 
 - [Channel/Poller/EventLoop模块](./tutorial/chapter1.md)
 
-- [Thread/EventLoopThread/EventLoopThreadPool](./tuorial/chatper2.md)
+- [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chatper2.md)
 
 - [Acceptor/Socket](./tutorial/chapter3.md)
-- [TcpConnection/TcpServer](./tutorial/chatper4.md)
+
+- [TcpConnection/TcpServer](./tutorial/chapter4.md)
 
 
 
