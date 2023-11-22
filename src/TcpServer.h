@@ -30,7 +30,6 @@ public:
             Option option = kNoReusePort);
     ~TcpServer();
     
-    
     void setThreadInitcallback(const ThreadInitCallback &cb) { threadInitCallback_ = cb; }
     void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
     void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
@@ -59,11 +58,12 @@ private:
 
     ConnectionCallback connectionCallback_; // 有新连接时的回调
     MessageCallback messageCallback_; // 有读写消息时的回调
-    WriteCompleteCallback writeCompleteCallback_; // 消息发送完成以后的回调
+    WriteCompleteCallback writeCompleteCallback_; // 消息发 送完成以后的回调
     
     ThreadInitCallback threadInitCallback_; // loop线程初始化的回调
     std::atomic_int started_; 
     
-    int nextConnId_;
-    ConnectionMap conncetions_; //保存 所有的连接
+    int nextConnId_;            
+    ConnectionMap conncetions_; //保存 所有的连接 
 }; 
+

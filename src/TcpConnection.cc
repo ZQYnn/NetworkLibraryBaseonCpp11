@@ -73,7 +73,6 @@ TcpConnection::~TcpConnection()
 
 
 
-
 void TcpConnection::handleRead(Timestamp receiveTime)
 {
     int savedErrno = 0;

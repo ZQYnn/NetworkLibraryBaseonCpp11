@@ -52,8 +52,7 @@ public:
     { 
         highWaterMarkCallback_ = cb; highWaterMark_ = highWaterMark;
     }
-   
-    
+     
     // 建立连接
     void connectEstablished(); 
     // 销毁连接  
