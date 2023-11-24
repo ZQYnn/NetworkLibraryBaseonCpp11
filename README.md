@@ -59,7 +59,7 @@ sudo apt-get install cmake
 下载项目
 
 ```shell
-git clone git@github.com:Shangyizhou/tiny-network.git
+git clone git@github.com:ZQYnn/NetworkLibraryBaseonCpp11.git
 ```
 
 执行脚本构建项目
@@ -74,14 +74,12 @@ cd ./tiny-network && bash autobuild.sh
 
 ```shell
 cd ./example
-./EchoServer
+./echoserver
 ```
 
 执行情况：
 
 ![img](https://cdn.nlark.com/yuque/0/2022/png/26752078/1663561528671-14461537-2593-4d52-b8da-da0c79248374.png)
-
-`http`模块有一个小型的`HTTP`服务器案例，也可以执行。其默认监听`8080`：
 
 
 
@@ -99,13 +97,11 @@ cd ./example
 
 - [Channel/Poller/EventLoop模块](./tutorial/chapter1.md)
 
-- [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chatper2.md)
+- [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chapter2.md)
 
 - [Acceptor/Socket](./tutorial/chapter3.md)
-
 - [TcpConnection/TcpServer](./tutorial/chapter4.md)
-
-
+- [流程梳理](./tutorial/chapter5.md)
 
 
 
