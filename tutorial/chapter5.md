@@ -253,7 +253,7 @@ void Acceptor::listen()
 
 ` update() {loop_->updateChannel(this)}`-->
 
-**EventLoop.cc **
+**EventLoop.cc**
 
 `updateChannel(Channel *channel){ poller_->updateChannel(channel)` -->
 
