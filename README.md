@@ -33,7 +33,7 @@
 
 
 ## 并发模型
-![](./assets/Muduo_Reactor.png)
+![](./assets/muduo_Reactor.png)
 
 
 
