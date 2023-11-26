@@ -33,8 +33,9 @@
 
 
 ## 并发模型
+![](./assets/Muduo_Reactor.png)
 
-<img src="./assets/Muduo_Reactor.png">
+
 
 项目采用主从 Reactor 模型，MainReactor 只负责监听派发新连接，在 MainReactor 中通过 Acceptor 接收新连接并轮询派发给 SubReactor，SubReactor 负责此连接的读写事件。
 
@@ -76,8 +77,8 @@ cd ./example
 ```
 
 执行情况：
+![](./assets/TcpServer.png)
 
-<img src="./assets/TcpServer.png">
 
 
 
