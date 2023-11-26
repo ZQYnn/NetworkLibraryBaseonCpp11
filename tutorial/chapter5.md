@@ -1,8 +1,6 @@
 #  执行流程梳理
 
-完成网络库编写后， 查看`example`下的测试用例
-
-
+完成网络库编写后， 查看`example`下的测试用例,  以echoserver作为案例， 讲解整个muduo库的工作流程
 
 ```c++
 #include <mymuduo/TcpServer.h>
@@ -169,9 +167,11 @@ acceptor_->setNewConncetionCallback(std::bind(&TcpServer::newConncetion,
 
 ## 3.启动echoServer服务器
 
+在谈完整的启动过程时，先来回顾一下在Muduo中应用到的**多Reactor多线程**模型
 
+<img src ="./assets/multiReactor.png" align = left width= 85%>
 
-在`echoserver `测试代码中  启动服务器。
+在`echoserver `测试代码中  启动服务器。 
 
 ```c++
 server.start(); ->   server_.start(); //TcpServer.start();
@@ -218,7 +218,6 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb)
         // 底层创建线程 绑定一个新的EventLoop 返回Loop的地址 
         loops_.push_back(t->startLoop());
     }
-
     // numThreads == 0 说明整个服务端只有一个线程， 运行着baseLoop
     if (numThreads_ == 0 && cb)
     {
@@ -242,9 +241,7 @@ void Acceptor::listen()
 }
 ```
 
-**剖析更改事件监听原理** :在Channel 中保存了`event`代表需要监听的事件，将channel.event 传入`epoll_ctl`即可监听事件。 修改其他Channel感兴趣事件同理。
-
-
+**剖析更改事件监听流程** :在Channel 中保存了`event`代表需要监听的事件，将channel.event 传入`epoll_ctl`即可监听事件。 修改其他Channel感兴趣事件同理。
 
 **执行的流程**： `acceptChannel_.enableReading()` -> 
 
@@ -294,17 +291,13 @@ void EPollPoller::update(int operation, Channel *channel)
 
 开启事件循环
 
-在开启线程池和设置监听事件之后， 直接开启事件循环, 这里启动的是mainReactor
+在开启线程池和设置监听事件之后， 直接开启事件循环, 这里启动的是`mainReactor`， 监听客户端建立连接事件。 
 
 `echoserver.cc`
 
 ```c++
 loop.loop(); // 启动mainLoop的底层Poller
 ```
-
-开启事件循环本质上执行`poller.poll`上的`epoll_wait`
-
-
 
 `EventLoop.cc`
 
@@ -330,6 +323,8 @@ void EventLoop::loop()
 }
 ```
 
+loop中的重点：`pollReturnTime_ = poller_->poll()` poll 底层调用`epoll_wait`方法,监听客户端建立连接的请求（当前是在MainReactor中 ，只有acceptrChannel 绑定lfd监听客户端建立请求）
+
 `EpollPoller.cc`
 
 ```c++
@@ -345,17 +340,21 @@ Timestamp EPollPoller::poll (int timeoutMs, ChannelList *activeChannels)
 }
 ```
 
-此时开启`poller`进行监听，
+此时开启`poller`进行监听lfd上读事件， 等待客户端建立连接的请求。
 
+执行到此，已经完成在MainReactor的任务， 即已经完成了下图中 <font color = red>红色</font>圈线部分操作，Reactor执行图如下：
 
+<img src ="./assets/muduo_reactor01.png" align = left width= 85%>
 
 
 
 ## 5.建立新连接
 
-监听新连接
+完成MainReactor上的accept事件后， 当前要做的就是将TcpConnection分发给`SubReactor`过程如下图红线所展示：
 
-监听acceptChannel上是否有事件发生， 需要执行AcceptChannel在`handleRead`中的`TcpServer::newConnection` 回调函数。
+<img src ="./assets/muduo_reactor02.png" align = left width= 85%>
+
+监听acceptChannel上是否有事件发生， 需要执行AcceptChannel在`handleRead`中的`TcpServer::newConnection` 回调函数， 建立连接。
 
 ```c++
 // listenfd 有事件发生了，  出现新用户连接
@@ -379,7 +378,7 @@ void Acceptor::handleRead()
 }
 ```
 
-接受客户端，在分发给subloop之前建立新连接建立连接`newConnectio()`
+接受客户端，在分发给subloop之前建立新连接建立连接`newConnection()`
 
 ```c++
 void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
@@ -416,22 +415,34 @@ void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
 }
 ```
 
-在执行newConnection主要
+
+
+## 6 唤醒SubReactor
+
+在多Reactor模型多线程模型中， MainReactor已经完成了在主线程中监听客户端连接，并且将TcpConnection分发给SubReactor，那么如何让SubReactor启动并执行相应的事件呢？
+
+在回答这个问题之前，我们需要认识到muduo上存在的一个现象— **跨线程调用**
+
+解释跨线程调用的问题，我们不得不回到首次出现跨线程调用的地方 — **`TcpServer::newConnection`**
+
+执行`newConnection`有以下几个步骤：
 
 - 获取ioLoop  `EventLoop *ioLoop = threadPool_->getNextLoop();`
 - 创建TcpConnection对象
-- 绑定回调函数
-- 执行`TcpConntion::connectEstablished`
+- 绑定subChannel相关回调函数
+- 执行`TcpConntion::connectEstablished`,  `ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn))`
 
-思考：在newConnection中获取的ioLoop是subLoop， 在这里调用runInLoop，底层是如何处理的？
+在MainLoop中调用`threadPool_->getNextLoop` ，获取ioLoop，这就是获取的指向subReactor的指针，那么在主线程中执行子Loop上 的相关回调函数是否可行呢？ 答案是否定的， 在muduo库中遵循了 one loop per thread原则，**即一个eventLoop对应一个子线程，eventLoop执行相关函数需要在属于自己所在的线程中执行**。
 
-`TcpServer::newConnection`
+那么下面这句话就属于跨线程调用的：
 
 ```c++
 ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 ```
 
-`EventLoop.cc`: 在mainLoop中获取subLoop(ioLoop)，当前loop不在自己所在的线程，从而执行`queueInLoop()`
+那在muduo中是如何解决跨线程调用的呢？ — `wakeupFd`
+
+回到跨线程调用这句话，在看到`wakeupFd`之前，先剖析在内部是如何调用，在mainLoop中获取subLoop(ioLoop)，当前loop不在自己所在的线程，从而执行`queueInLoop()`
 
 ```c++
 void EventLoop::runInLoop(Functor cb)
@@ -445,7 +456,7 @@ void EventLoop::runInLoop(Functor cb)
 }
 ```
 
-`EventLoop::queueInLoop`: 当前Loop不属于自己所在线程执行`wakeup()`
+`EventLoop::queueInLoop`: 将回调函数`TcpConncetion::connectionEsatblished`保存到`pendingFunctors`中, 当前Loop不属于自己所在线程执行`wakeup()`
 
 ```c++
 void EventLoop::queueInLoop(Functor cb)
@@ -456,12 +467,12 @@ void EventLoop::queueInLoop(Functor cb)
     }
     if(!isInLoopThread() || callingPendingFunctors_)
     {
-        wakeup(); // 满足!isInLoopThread()-> 执行wakeup()
+        wakeup(); // 满足 !isInLoopThread()-> 执行wakeup()
     }
 }
 ```
 
-`EventLoop.cc`: 唤醒loop所对应的线程， 执行相应回调函数。=
+`EventLoop.cc`: 唤醒loop所对应的线程， 执行相应回调函数`TcpConncetion::connectionEsatblished`
 
 ```c++
 void EventLoop::wakeup()
@@ -475,9 +486,41 @@ void EventLoop::wakeup()
 }
 ```
 
+执行`wakeup()`函数， 到这里你可能有疑问，在`wakeup()`中不就是只有一个写操作么？ 那是如何唤醒的呢？
+
+在一开始完成构造线程池对象的时候，已经创建多个eventLoop，每个eventLoop开启了loop方法
+
+```c++
+void EventLoop::loop()
+{
+    looping_ = true;
+    quit_ = false;
+    while (!quit_)
+    {
+        activeChannels_.clear();
+        pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_); 
+        for (Channel *channel :  activeChannels_)
+        {
+            channel->handleEvent(pollReturnTime_);
+        }
+        doPendingFunctors();
+    }
+    LOG_INFO("EventLoop %p \n", this); 
+    looping_ = false;   
+}
+```
+
+`EventLoop.loop()`方法本质上 就是执行  `poller_->poll()`内部`epoll_wait`方法 ，在`TcpConnection::newConnection`完成注册之前，在subLoop的`connfd`监听不到任何事件的,那么就导致子线程阻塞在`epoll_wait`这里，而在EventLoop上执行相应的事件是需要调用 `doPendingFunctors()`的， 目前就出现了在注册TcpConnection的过程中设置回调`TcpConncetion::connectionEsatblished`无法执行， 出现这就现象我们就需要**唤醒操作**
+
+唤醒方法：让EventLoop不要阻塞在poll函数， 运行到`doPendingFunctors()`,就可以完成任务，具体的实现方法如下
+
+1. 每个EventLoop上设置了`wakeupFd_`, 将`wakeupFd_`封装成`wakeupChannel_`
+2. 在构造EventLoop对象的时候在Poller上注册可读事件
+3. 在`EventLoop::queueInLoop()` 中调用`wakeup()` 通过`wakeupFd_`写数据，`epoll_wait` 检测到可读事件， 解除阻塞问题，进而执行`doPendingFunctors`
 
 
-到自己所在线程中执行`TcpConnection::ConnectionEstablished`
+
+`doPendingFunctors` 上执行的是`TcpConnection::ConnectionEstablished`
 
 ```c++
 void TcpConnection::connectEstablished()
@@ -492,13 +535,15 @@ void TcpConnection::connectEstablished()
 }
 ```
 
+connectionCallback是用户自己在echoserver中绑定的OnConncetion函数，此时已经唤醒SubReactor并完整地注册好连接。
 
+目前，我们已经完整梳理好唤醒subReactor的来龙去脉：当出现**跨线程调用**的时候，通过`wakeup()`**唤醒**EventLoop，执行相应回调即可，同理出现其他的跨线程调用的情况执行代码逻辑相同。
 
-connectionCallback是用户自己在echoserver中绑定的OnConncetion函数。
+## 7. subLoop 处理 读写数据
 
-## 6. subLoop 处理 读写数据
+在完成注册TcpConnection之后，着重处理SubReactor上的读写事件，即处理当前红色圈线部分内容
 
-处理读写任务的时候是怎么样子的么 ？
+<img src ="./assets/muduo_reactor03.png" align = left width= 85%>
 
 poller中监听sub各种事件 ，TcpConncetion构造时绑定subChannel各种事件回调函数，
 
@@ -568,47 +613,15 @@ void TcpConnection::handleRead(Timestamp receiveTime)
 }
 ```
 
-同理执行其他事件     
-
-​     
-
-​    
 
 
-
-# 画图现实
-
-## Reactor模型
-
-
-
-
-
-## 代码执行过程
+下图说明整个网络库的执行流程 ：
 
 ![](./assets/muduo.drawio.png)
 
-## 多路事件分发器
 
-```mermaid
-sequenceDiagram
-		participant Event
-		participant Reactor
-		participant Demultiplex
-		participant EventHandler
-		Event ->>Reactor: 注册Event和Handler
-		loop 事件集合
-					Reactor-> Reactor:event集合
-		end
-		Reactor ->> Demultiplex: 向Epoll add/mod/del Event
-		Reactor ->> Demultiplex: 启动反应堆
-		loop 事件分发器
-					Demultiplex -> Demultiplex:开启事件循环 epoll_wait
-		end
-		Demultiplex ->> Reactor: 返回事件的Event
-		Reactor ->> EventHandler: 调用Event对应的事件处理器EventHandler
 
-```
+
 
 
 
