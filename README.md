@@ -76,7 +76,8 @@ cd ./example
 ./echoserver
 ```
 
-执行情况：
+Reactor处理事件流程：
+
 ![](./assets/TcpServer.png)
 
 
