@@ -33,8 +33,7 @@
 
 
 ## 并发模型
-![](./assets/muduo_Reactor.png)
-
+<img src = "https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_Reactor.png" width=85% align=left>
 
 
 项目采用主从 Reactor 模型，MainReactor 只负责监听派发新连接，在 MainReactor 中通过 Acceptor 接收新连接并轮询派发给 SubReactor，SubReactor 负责此连接的读写事件。
@@ -76,9 +75,9 @@ cd ./example
 ./echoserver
 ```
 
-Reactor处理事件流程：
+Reacto处理事件流程：
 
-![](./assets/TcpServer.png)
+<img src = "https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/TcpServer.png" width=85% align=left>
 
 
 
@@ -98,8 +97,11 @@ Reactor处理事件流程：
 - [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chapter2.md)
 
 - [Acceptor/Socket](./tutorial/chapter3.md)
-- [TcpConnection/TcpServeru](./tutorial/chapter4.md)
+
+- [TcpConnection/TcpServer](./tutorial/chapter4.md)
+
 - [<font color = red>常见问题解析</font>](./tutorial/chapter6.md)
+
 - [<font color =red>处理流程深度剖析</font>](./tutorial/chapter5.md)
 
 ## 优化计划
