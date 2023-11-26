@@ -29,11 +29,13 @@ Libev 作者
 - 如果是连接建立的事件，则交由 Acceptor 对象进行处理，Acceptor 对象会通过 accept 方法 获取连接，并创建一个 Handler 对象来处理后续的响应事件。
 - 如果不是连接事件，交给当前连接对应的Handler响应。
 
-<img src="./assets/oneReactor.png" width=85% align=left>
+![](./assets/oneReactor.png)
+
+
 
 **单Reactor**结构处理事件的流程图
 
-<img src="./assets/Reactor03.png" width=85% align=left>
+![](./assets/Reactor03.png)
 
 
 
@@ -47,7 +49,7 @@ Libev 作者
 
 多Reactor多线程模型结构图：
 
-<img src="./assets/multiReactor.png" width=85% align=left>
+![](./assets/multiReactor.png)
 
 **总结**：在Muduo中， `MainReactor` 只负责监听建立连接，通过`accept`将监听返回的`connfd`打包的`channel`上， 用轮询的方式，分发给`subReactor`，`subReactor`  对应的EventLoop 中的一个子线程处理相应事件， 工作线程上的`SubReactor` 代表一个`EventLoop`， 每个`EventLoop` 监听一组`Channel`， 每一组`Channel`都在自己的EventLoop线程中执行。
 
