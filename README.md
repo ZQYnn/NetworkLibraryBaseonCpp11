@@ -1,10 +1,12 @@
-# Tiny C++ Network Library
+# High Performance Network Library Based on CPP 11
 
 
 
 | **Part Ⅰ**            | **Part Ⅱ**            | **Part Ⅲ**            | **Part Ⅳ**            | **Part Ⅴ**            | **Part Ⅵ**            | **Part Ⅶ**            |
 | --------------------- | --------------------- | --------------------- | --------------------- | --------------------- | --------------------- | --------------------- |
-| [项目介绍](#项目介绍) | [项目特点](#项目特点) | [开发环境](#开发环境) | [并发模型](#并发模型) | [构建项目](#构建项目) | [运行案例](#运行案例) | [模块讲解](#模块讲解) |
+| [项目介绍](#项目介绍) | [项目特点](#项目特点) | [开发环境](#开发环境) | [并发模型](#并发模型) | [构建项目](#构建项目) | [运行案例](#运行案例) | [相关讲解](#模块讲解) |
+
+
 
 ## 项目介绍
 
@@ -14,15 +16,11 @@
 
 ## 项目特点
 
-- 底层使用 Epoll + LT 模式的 I/O 复用模型，并且结合非阻塞 I/O  实现主从 Reactor 模型。
-- 采用「one loop per thread」线程模型，并向上封装线程池避免线程创建和销毁带来的性能开销。
+- 底层使用 `Epoll + LT` 模式的 I/O 复用模型，并且结合非阻塞 I/O  实现主从 Reactor 模型。
+- 采用`one loop per thread`线程模型，并向上封装线程池避免线程创建和销毁带来的性能开销。
+- MainReactor中Reactor处理`accept`请求， 使用`Round Robin`给线程池subReactor处理
 - 采用 eventfd 作为事件通知描述符，方便高效派发事件到其他线程执行异步任务。
-- 基于自实现的双缓冲区实现异步日志，由后端线程负责定时向磁盘写入前端日志信息，避免数据落盘时阻塞网络服务。
-- 基于红黑树实现定时器管理结构，内部使用 Linux 的 timerfd 通知到期任务，高效管理定时任务。
 - 遵循 RAII 手法使用智能指针管理内存，减小内存泄露风险。
-- 利用有限状态机解析 HTTP 请求报文。
-- 参照 Nginx 实现了内存池模块，更好管理小块内存空间，减少内存碎片。
-- 数据库连接池可以动态管理连接数量，及时生成或销毁连接，保证连接池性能。
 
 ## 开发环境
 
@@ -36,7 +34,7 @@
 
 ## 并发模型
 
-![image.png](https://cdn.nlark.com/yuque/0/2022/png/26752078/1670853134528-c88d27f2-10a2-46d3-b308-48f7632a2f09.png?x-oss-process=image%2Fresize%2Cw_937%2Climit_0)
+<img src="./assets/Muduo_Reactor.png">
 
 项目采用主从 Reactor 模型，MainReactor 只负责监听派发新连接，在 MainReactor 中通过 Acceptor 接收新连接并轮询派发给 SubReactor，SubReactor 负责此连接的读写事件。
 
@@ -65,12 +63,12 @@ git clone git@github.com:ZQYnn/NetworkLibraryBaseonCpp11.git
 执行脚本构建项目
 
 ```shell
-cd ./tiny-network && bash autobuild.sh
+cd ./NetworkLibraryBaseonCpp11 && bash autobuild.sh
 ```
 
 ## 运行案例
 
-这里以一个简单的回声服务器作为案例，`EchoServer`默认监听端口为`8080`。
+这里以一个简单的回声服务器作为案例，`EchoServer`默认监听端口为`8000`。
 
 ```shell
 cd ./example
@@ -79,13 +77,11 @@ cd ./example
 
 执行情况：
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/26752078/1663561528671-14461537-2593-4d52-b8da-da0c79248374.png)
+<img src="./assets/TcpServer.png">
 
 
 
-
-
-## 模块讲解
+## 相关讲解
 
 这里的某些模块会配置 muduo 源码讲解，有些使用的是本项目的源码，不过实现思路是一致的。
 
@@ -100,19 +96,19 @@ cd ./example
 - [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chapter2.md)
 
 - [Acceptor/Socket](./tutorial/chapter3.md)
-- [TcpConnection/TcpServer](./tutorial/chapter4.md)
-- [流程梳理](./tutorial/chapter5.md)
-
-
+- [TcpConnection/TcpServeru](./tutorial/chapter4.md)
+- [<font color = red>常见问题解析</font>](./tutorial/chapter6.md)
+- [<font color =red>处理流程深度剖析</font>](./tutorial/chapter5.md)
 
 ## 优化计划
 
-1. 计划使用 std::chrono 实现底层时间戳
-2. 使用优先级队列管理定时器结构
-3. 覆盖更多的单元测试
+1. 添加HTTP模块
+2. 添加日志模块
 
 ## 参考
 
 - 《Linux高性能服务器编程》
-- 《Linux多线程服务端编程：使用muduo C++网络库》
+- 《Linux多线程服务端编程：使用muduo C++网络库》 
+- 《UNIX网络编程》
+- Reactor模型理解 https://zhuanlan.zhihu.com/p/368089289
 - https://github.com/chenshuo/muduo
