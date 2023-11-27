@@ -30,7 +30,7 @@ Libev 作者
 - 如果不是连接事件，交给当前连接对应的Handler响应。
 
 
-<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/oneReactor.png" width=85%>
+<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/oneReactor.png" width=85% align=left>
 
 
 **单Reactor**结构处理事件的流程图
