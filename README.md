@@ -33,11 +33,7 @@
 
 
 ## 并发模型
-<<<<<<< HEAD
-=======
 
-
->>>>>>> 901a43017f70bf87cc5a1e5eeeec64e0204060fe
 
 <img src="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/multiReactor.png" width=85%>
 
