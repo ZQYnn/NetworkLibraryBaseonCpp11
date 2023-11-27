@@ -35,12 +35,9 @@
 ## 并发模型
  
 
-<<<<<<< HEAD
+
 <img src="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/Muduo_Reactor.png" width=85%>
 
-=======
-<img src="./assets/Muduo_Reactor.png"  width=85%>
->>>>>>> 1583a46b57772a8024ec095fab6d1620e26b5e75
 
 项目采用主从 Reactor 模型，MainReactor 只负责监听派发新连接，在 MainReactor 中通过 Acceptor 接收新连接并轮询派发给 SubReactor，SubReactor 负责此连接的读写事件。
 
