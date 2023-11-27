@@ -35,7 +35,8 @@
 ## 并发模型
  
 
-<img src="./assets/Muduo_Reactor.png" align="left" width=85%>
+<img src="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/Muduo_Reactor.png" width=85%>
+
 
 项目采用主从 Reactor 模型，MainReactor 只负责监听派发新连接，在 MainReactor 中通过 Acceptor 接收新连接并轮询派发给 SubReactor，SubReactor 负责此连接的读写事件。
 
@@ -77,9 +78,9 @@ cd ./example
 ```
 
 执行情况：
-<div align=left>
-    <img src="./assets/TcpServer.png"> 
-</div>
+
+<img src= "https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/TcpServer.png" width=85%> 
+
 
 ## 相关讲解
 
@@ -94,7 +95,6 @@ cd ./example
 - [Channel/Poller/EventLoop模块](./tutorial/chapter1.md)
 
 - [Thread/EventLoopThread/EventLoopThreadPool](./tutorial/chapter2.md)
-
 - [Acceptor/Socket](./tutorial/chapter3.md)
 - [TcpConnection/TcpServeru](./tutorial/chapter4.md)
 - [<font color = red>常见问题解析</font>](./tutorial/chapter6.md)
