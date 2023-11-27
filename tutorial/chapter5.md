@@ -169,7 +169,7 @@ acceptor_->setNewConncetionCallback(std::bind(&TcpServer::newConncetion,
 
 在谈完整的启动过程时，先来回顾一下在Muduo中应用到的**多Reactor多线程**模型
 
-<img src = "https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/multiReactor.png" width = 85%>
+<img src = "https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/multiReactor.png" width=85%>
 
 
 
@@ -346,17 +346,16 @@ Timestamp EPollPoller::poll (int timeoutMs, ChannelList *activeChannels)
 
 执行到此，已经完成在MainReactor的任务， 即已经完成了下图中 <font color = red>红色</font>圈线部分操作，Reactor执行图如下：
 
-![](./assets/muduo_reactor01.png)
 
 
-<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor01.png>" width = 85%>
+<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor01.png>" width=85%>
 
 
 ## 5.建立新连接
 
 完成MainReactor上的accept事件后， 当前要做的就是将TcpConnection分发给`SubReactor`过程如下图红线所展示：
 
-<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor02.png>" width = 85%>
+<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor02.png>" width=85%>
 
 监听acceptChannel上是否有事件发生， 需要执行AcceptChannel在`handleRead`中的`TcpServer::newConnection` 回调函数， 建立连接。
 
@@ -547,7 +546,7 @@ connectionCallback是用户自己在echoserver中绑定的OnConncetion函数，�
 
 在完成注册TcpConnection之后，着重处理SubReactor上的读写事件，即处理当前红色圈线部分内容
 
-<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor03.png>" width = 85%>
+<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_reactor03.png>" width=85%>
 
 poller中监听sub各种事件 ，TcpConncetion构造时绑定subChannel各种事件回调函数，
 
@@ -620,11 +619,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
 
 
 下图说明整个网络库的执行流程 ：
-<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_drawio.png>" width = 85%>
-
-
-
-
+<img src ="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/muduo_drawio.png>" width=85%>
 
 
 
