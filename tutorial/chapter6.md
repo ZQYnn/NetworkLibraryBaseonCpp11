@@ -1,5 +1,9 @@
 #  相关概念解释
 
+## 项目概述
+
+本项目实现一个基于非阻塞 IO、事件驱动以及 Reactor 设计模式的 C++ 高并发 TCP 网络库，本项 过 one loop per thread 线程模型实现高并发。
+
 ## 什么是 one loop per thread 以及选择它的原因
 
 在此中模型下， 程序里的每个IO线程有一个eventloop （Reactor）用于处理事件的读写
@@ -58,10 +62,23 @@ Libev 作者
 
 
 
+## 网络库的IO模型是怎么？为什么这个IO模型是高效的？
 
+来自小林[Coding](https://zhuanlan.zhihu.com/p/368089289)
 
+**阻塞 I/O**，当用户程序执行 `read` ，线程会被阻塞，一直等到内核数据准备好，并把数据从内核缓冲区拷贝到应用程序的缓冲区中，当拷贝过程完成，`read` 才会返回。
 
+注意，**阻塞等待的是「内核数据准备好」和「数据从内核态拷贝到用户态」这两个过程**。过程如下图：
 
-shendu
+<img src="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/blocking.png" width=60%>
 
-mac_os
+**非阻塞 I/O**，非阻塞的 read 请求在数据未准备好的情况下立即返回，可以继续往下执行，此时应用程序不断轮询内核，直到数据准备好，内核将数据拷贝到应用程序缓冲区，`read` 调用才可以获取到结果。过程如下图：
+
+<img src="https://pic-go-oss.oss-cn-beijing.aliyuncs.com/muduo/non_blocking.png" width=60%>
+
+`Reactor[one loop per thread: non-blocking + IO multiplexing]`模型。muduo采用的是Reactors in thread有一个main Reactor负责accept(2)连接，然后把连接挂在某个sub Reactor中(muduo中采用的是round-robin的方式来选择sub Reactor)，这样该连接的所有操作都在那个sub Reactor所处的线程中完成。多个连接可能被分到多个线程中，以充分利用CPU。
+
+## 使用eventFd的作用是什么
+
+- eventfd是linux的一个系统调用，为事件通知创建文件描述符，eventfd()创建一个“eventfd对象”，这个对象能被用户空间应用用作一个**事件等待/响应机制**，靠内核去响应用户空间应用事。
+- 实现唤醒，让IO线程从IO multiplexing阻塞调用中返回，更高效地唤醒。
