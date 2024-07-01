@@ -338,6 +338,9 @@ EventLoop::~EventLoop()
 2. 将`wakeupChannel`从`Poller`上移除
 3. 关闭`wakeupFd`
 4. 将EventLoop指针置为空
+
+
+
 ###  EventLoop 事件驱动的核心——loop()
 
 调用 EventLoop.loop() 正式开启事件循环，其内部会调用 `Poller::poll -> ::epoll_wait`正式等待活跃的事件发生，然后处理这些事件。

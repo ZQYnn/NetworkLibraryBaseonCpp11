@@ -1,3 +1,5 @@
+
+
 #  执行流程梳理
 
 完成网络库编写后， 查看`example`下的测试用例,  以echoserver作为案例， 讲解整个muduo库的工作流程
@@ -421,6 +423,8 @@ void TcpServer::newConncetion(int sockfd, const InetAddress &peerAddr)
 
 
 ## 6 唤醒SubReactor
+
+
 
 在多Reactor模型多线程模型中， MainReactor已经完成了在主线程中监听客户端连接，并且将TcpConnection分发给SubReactor，那么如何让SubReactor启动并执行相应的事件呢？
 
